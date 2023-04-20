@@ -1,0 +1,32 @@
+[tool.poetry]
+name = "saxonche-stubs"
+version = "0.1.0"
+description = "Type stubs for saxonche"
+authors = ["Bpolitycki <bastian.politycki@unisg.ch>"]
+license = "GPL-3.0-or-later"
+readme = "README.md"
+packages = [{include = "saxonche-stubs"}]
+
+[tool.poetry.dependencies]
+python = "^3.8"
+saxonche = "^12.1.0"
+
+[tool.poetry.group.dev.dependencies]
+black = "^23.3.0"
+ruff = "^0.0.262"
+mypy = "^1.2.0"
+
+[tool.mypy]
+mypy_path = "saxonche-stubs"
+check_untyped_defs = true
+ignore_errors = false
+ignore_missing_imports = true
+strict_optional = true
+
+[tool.ruff]
+select = ["E", "F", "I001"]
+ignore = ["E501"]
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"

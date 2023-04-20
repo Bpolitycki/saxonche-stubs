@@ -1,0 +1,43 @@
+#!/bin/bash
+
+src='saxonche-stubs'
+
+function cmd {
+  # Run any command you want
+  poetry run "${@}"
+}
+
+function fmt {
+  cmd black . "${@}"
+  cmd ruff --fix . "${@}"
+}
+
+function fmt-check {
+    echo "Checking the format with black..."
+    cmd black --check ${src}
+}
+
+function lint-only {
+    echo "Linting using ruff..."
+    cmd ruff ${src}
+    echo "Linting using mypy"
+    cmd mypy ${src}
+}
+
+function lint {
+    fmt-check
+    lint-only
+}
+
+function stubtest {
+    cmd stubtest saxonche
+}
+
+function help {
+    echo "$0 <task> <args>"
+    echo "Tasks:"
+    compgen -A function | cat -n
+}
+
+TIMEFORMAT="Task completed in %3lR"
+time ${@:-default}
