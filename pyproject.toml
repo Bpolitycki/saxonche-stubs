@@ -7,6 +7,29 @@ license = "GPL-3.0-or-later"
 readme = "README.md"
 packages = [{include = "saxonche-stubs"}]
 
+classifiers = [
+    "Intended Audience :: Information Technology",
+    "Intended Audience :: Developers",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python",
+    "Topic :: XML",
+    "Topic :: Software Development :: Libraries :: Application Frameworks",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+    "Topic :: Software Development :: Libraries",
+    "Topic :: Software Development",
+    "Typing :: Typed",
+    "Programming Language :: Python :: 3 :: Only",
+    "Programming Language :: Python :: 3.7",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+]
+
+[project.urls]
+Homepage = "https://github.com/Bpolitycki/saxonche-stubs"
+
 [tool.poetry.dependencies]
 python = ">=3.8"
 saxonche = "^12.1.0"
