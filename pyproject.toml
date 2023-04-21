@@ -8,7 +8,7 @@ readme = "README.md"
 packages = [{include = "saxonche-stubs"}]
 
 [tool.poetry.dependencies]
-python = "^3.8"
+python = ">=3.8"
 saxonche = "^12.1.0"
 
 [tool.poetry.group.dev.dependencies]
