@@ -1,4 +1,4 @@
-from typing import Any, Self, overload
+from typing import Any, Iterator, Self, overload
 
 def __getattr__(name: str) -> Any: ...
 
@@ -21,6 +21,10 @@ class PySaxonProcessor:
     def new_xpath_processor(self) -> PyXPathProcessor:
         """Creates a new XPath processor, which used to evaluate XPath expressions."""
         ...
+    def new_xquery_processor(self) -> PyXQueryProcessor:
+        """Creates a new XQuery processor, which used to evaluate XQuery expressions."""
+        ...
+    def new_xslt30_processor(self) -> PyXslt30Processor: ...
     @overload
     def parse_xml(self, xml_file_name: str) -> PyXdmNode:
         """Parse a lexical representation, source file or uri of the source document
@@ -59,9 +63,68 @@ class PySaxonProcessor:
         ...
 
 class PyXPathProcessor:
-    def __init__(self) -> None: ...
+    def __init__(self) -> None:
+        """An XPathProcessor represents factory to compile, load and execute the XPath query."""
+        ...
+    def clear_parameters(self) -> None:
+        """Clear all parameters that have been set"""
+        ...
+    def clear_properties(self) -> None:
+        """Clear all properties that have been set"""
+        ...
+    def declare_namespace(self, prefix: str, uri: str) -> None:
+        """Declare a namespace prefix for use in XPath expressions.
 
-class PyXdmItem:
+        Args:
+            prefix (str): The namespace prefix
+            uri (str): The namespace uri
+        """
+        ...
+    def evaluate(self, xpath: str) -> PyXdmValue:
+        """Evaluate an XPath expression and return the result as a sequence.
+
+        Args:
+            xpath (str): The XPath expression
+
+        Returns:
+            PyXdmValue: A sequence of Xdm Values is returned.
+        """
+        ...
+    def evaluate_single(self, xpath: str) -> PyXdmItem | None:
+        """Evaluate an XPath expression and return the result as a single item.
+
+        Args:
+            xpath (str): The XPath expression
+
+        Returns:
+            PyXdmValue: A single Xdm Item is returned. return None if the expression returns an empty sequence.
+            If the expression returns a sequence of more than one item, any items after the first are ignored.
+        """
+        ...
+
+class PyXQueryProcessor:
+    def __init__(self) -> None:
+        """An PyXQueryProcessor object represents factory to compile, load and execute queries."""
+    ...
+
+class PyXslt30Processor:
+    def __init__(self) -> None:
+        """An PyXslt30Processor represents factory to compile, load and execute a stylesheet."""
+        ...
+
+class PyXdmValue:
+    def __init__(self) -> None:
+        """Value in the XDM data model. A value is a sequence of one or more items."""
+        ...
+    def __iter__(self) -> Iterator[PyXdmItem]:
+        """Iterate over the items in the sequence.
+
+        Returns:
+            Iterator[PyXdmItem]: Iterator object of PyXdmValue
+        """
+        ...
+
+class PyXdmItem(PyXdmValue):
     def __init__(self) -> None: ...
     def get_atomic_value(self) -> PyXdmAtomicValue:
         """Get the atomic value of this item.
