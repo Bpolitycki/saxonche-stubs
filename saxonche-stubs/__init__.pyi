@@ -213,6 +213,11 @@ class PyXdmItem(PyXdmValue):
         """
         ...
 
+class PyXdmFunctionItem(PyXdmItem):
+    def __init__(self) -> None:
+        """Represents a function item in the XDM data model."""
+        ...
+
 class PyXdmAtomicValue(PyXdmItem):
     def __init__(self) -> None:
         """Reprensts an atomic value in the XDM data model. Atomic values are either
@@ -236,8 +241,83 @@ class PyXdmAtomicValue(PyXdmItem):
         """
         ...
 
-class PyXdmMap(PyXdmItem):
-    def __init__(self) -> None: ...
+class PyXdmMap(PyXdmFunctionItem):
+    def __init__(self) -> None:
+        """The class PyXdmMap represents a map in the XDM data model. A map is a list of zero or more entries,
+        each consisting of a key-value pair. The map itself is an XDM item and is immutable.
+        """
+        ...
+    @property
+    def map_size(self) -> int:
+        """Property which returns the number of entries in the map.
+
+        Returns:
+            int: The number of entries in the map
+        """
+        ...
+    @property
+    def string_value(self) -> str:
+        """Property which returns the string value of the map.
+
+        Returns:
+            str: The string value of the map
+        """
+        ...
+    def contains_key(self, key: PyXdmAtomicValue) -> bool:
+        """Check whether the map contains a given key.
+
+        Args:
+            key (PyXdmAtomicValue): The key
+
+        Returns:
+            bool: True if the map contains the key, False otherwise
+        """
+        ...
+    def get(self, key: str | PyXdmAtomicValue | int | float) -> PyXdmValue | None:
+        """Get the value associated with a given key.
+
+        Args:
+            key (str | PyXdmAtomicValue | int | float): The key
+
+        Returns:
+            PyXdmValue | None: The value associated with the key or None if the key is not present in the map
+        """
+        ...
+    def keys(self) -> list[PyXdmAtomicValue]:
+        """Get the keys of the map.
+
+        Returns:
+            list[PyXdmAtomicValue]: The keys of the map
+        """
+        ...
+    def put(self, key: PyXdmAtomicValue, value: PyXdmValue) -> PyXdmMap:
+        """Put an entry into the map. And return a new map with the entry added.
+
+        Args:
+            key (PyXdmAtomicValue): The key
+            value (PyXdmValue): The value
+
+        Returns:
+            PyXdmMap: The map with the entry added
+        """
+        ...
+    def remove(self, key: PyXdmValue) -> PyXdmMap:
+        """Remove an entry from the map.
+
+        Args:
+            key (PyXdmValue): The key
+
+        Returns:
+            PyXdmMap: The map with the entry removed
+        """
+        ...
+    def values(self) -> list[PyXdmValue]:
+        """Get the values of the map.
+
+        Returns:
+            list[PyXdmValue]: The values of the map
+        """
+        ...
 
 class PyXdmNode(PyXdmItem):
     def __init__(self) -> None: ...
