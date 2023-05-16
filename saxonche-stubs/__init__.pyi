@@ -18,6 +18,16 @@ class PySaxonProcessor:
     def clear_configuration_properties(self) -> None:
         """Clear all configuration properties that have been set"""
         ...
+    def exception_clear(self) -> None:
+        """Clear any exception that has been raised"""
+        ...
+    def exception_occurred(self) -> bool:
+        """Check whether an exception has been raised internally within Saxon/C.
+
+        Returns:
+            bool: True if an exception has been raised, False otherwise
+        """
+        ...
     def new_xpath_processor(self) -> PyXPathProcessor:
         """Creates a new XPath processor, which used to evaluate XPath expressions."""
         ...
@@ -80,25 +90,68 @@ class PyXPathProcessor:
             uri (str): The namespace uri
         """
         ...
-    def evaluate(self, xpath: str) -> PyXdmValue:
+    def effective_boolean_value(self, xpath_str: str) -> bool:
+        """Evaluate an XPath expression and return the effective boolean value of the result.
+
+        Args:
+            xpath (str): The XPath expression
+
+        Returns:
+            bool: The effective boolean value of the result
+        """
+        ...
+    def evaluate(self, xpath_str: str) -> PyXdmValue | None:
         """Evaluate an XPath expression and return the result as a sequence.
 
         Args:
             xpath (str): The XPath expression
 
         Returns:
-            PyXdmValue: A sequence of Xdm Values is returned.
+            PyXdmValue: A sequence of Xdm Values is returned. Return None if the expression returns an empty sequence.
         """
         ...
-    def evaluate_single(self, xpath: str) -> PyXdmItem | None:
+    def evaluate_single(self, xpath_str: str) -> PyXdmItem | None:
         """Evaluate an XPath expression and return the result as a single item.
 
         Args:
             xpath (str): The XPath expression
 
         Returns:
-            PyXdmValue: A single Xdm Item is returned. return None if the expression returns an empty sequence.
+            PyXdmValue: A single Xdm Item is returned. Return None if the expression returns an empty sequence.
             If the expression returns a sequence of more than one item, any items after the first are ignored.
+        """
+        ...
+    def exception_clear(self) -> None:
+        """Clear any exception that has been raised"""
+        ...
+    def exception_count(self) -> int:
+        """Get the number of errors and warnings that have been reported.
+
+        Returns:
+            int: The number of errors and warnings that have been reported
+        """
+        ...
+    def exception_occured(self) -> bool:
+        """Check whether an exception has been raised internally within Saxon/C.
+
+        Returns:
+            bool: True if an exception has been raised, False otherwise
+        """
+        ...
+    @overload
+    def set_context(self, file_name: str) -> None:
+        """Set the context item from a file.
+
+        Args:
+            file_name (str): The file name of the context item
+        """
+        ...
+    @overload
+    def set_context(self, xdm_item: PyXdmItem) -> None:
+        """Set the context item from an XdmItem.
+
+        Args:
+            xdm_item (PyXdmItem): The XdmItem of the context item
         """
         ...
 
