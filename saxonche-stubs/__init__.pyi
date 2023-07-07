@@ -28,6 +28,36 @@ class PySaxonProcessor:
             bool: True if an exception has been raised, False otherwise
         """
         ...
+    def make_boolean_value(self, value: bool) -> PyXdmAtomicValue:
+        """Create an XdmValue from a boolean.
+
+        Args:
+            value (bool): The boolean value
+
+        Returns:
+            PyXdmAtomicValue: The XdmAtomicValue representing the boolean value.
+        """
+        ...
+    def make_integer_value(self, value: int) -> PyXdmAtomicValue:
+        """Create Int64Value or a BigIntegerValue from an integer.
+
+        Args:
+            value (int): The integer value
+
+        Returns:
+            PyXdmAtomicValue: The XdmAtomicValue representing the integer value.
+        """
+        ...
+    def make_string_value(self, str_: str) -> PyXdmAtomicValue:
+        """Create an XdmValue from a string.
+
+        Args:
+            str_ (str): The string value. NULL is taken as equivalent to "".
+
+        Returns:
+            PyXdmAtomicValue: The XdmAtomicValue representing the string value.
+        """
+        ...
     def new_xpath_processor(self) -> PyXPathProcessor:
         """Creates a new XPath processor, which used to evaluate XPath expressions."""
         ...
