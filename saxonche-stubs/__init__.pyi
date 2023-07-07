@@ -194,6 +194,21 @@ class PyXslt30Processor:
     def __init__(self) -> None:
         """An PyXslt30Processor represents factory to compile, load and execute a stylesheet."""
         ...
+    def clear_parameters(self) -> None:
+        """Clear all parameters that have been set"""
+        ...
+    def set_parameter(self, name: str, value: PyXdmValue) -> None:
+        """Set the value of a stylesheet parameter.
+
+        Args:
+            name (str): The name of the stylesheet parameter, as a string.
+                        For namespaced parameter use the JClark notation, that is "{uri}local".
+            value (PyXdmValue): The value of the stylesheet parameter, or None to clear a previously set value.
+
+        Returns:
+            None
+        """
+        ...
 
 class PyXdmValue:
     def __init__(self) -> None:
