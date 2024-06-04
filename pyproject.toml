@@ -1,11 +1,11 @@
 [tool.poetry]
 name = "saxonche-stubs"
-version = "0.6.0"
+version = "0.7.0"
 description = "Type stubs for saxonche"
 authors = ["Bpolitycki <bastian.politycki@unisg.ch>"]
 license = "GPL-3.0-or-later"
 readme = "README.md"
-packages = [{include = "saxonche-stubs"}]
+packages = [{ include = "saxonche-stubs" }]
 
 classifiers = [
     "Intended Audience :: Information Technology",

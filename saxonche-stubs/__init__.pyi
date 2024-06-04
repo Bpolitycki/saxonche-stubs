@@ -196,6 +196,18 @@ class PyXslt30Processor:
         ...
     def clear_parameters(self) -> None:
         """Clear all parameters that have been set"""
+
+    @overload
+    def compile_stylesheet(self, stylesheet_text: str) -> :
+        """Compile a stylesheet from a string."""
+        ...
+    @overload
+    def compile_stylesheet(self, stylesheet_file: str) -> None:
+        """Compile a stylesheet from a file."""
+
+    @overload
+    def compile_stylesheet(self, stylesheet_node: PyXdmNode) -> None:
+        """Compile a stylesheet from a XDM node."""
         ...
     def set_parameter(self, name: str, value: PyXdmValue) -> None:
         """Set the value of a stylesheet parameter.
@@ -209,6 +221,18 @@ class PyXslt30Processor:
             None
         """
         ...
+
+class PyXsltExecutable:
+    def __init__(self) -> None:
+        """An PyXsltExecutable represents the compiled form of a stylesheet."""
+        ...
+    @overload
+    def transform_to_string(self, source_file: str, base_output_uri: str | None) -> str | None:
+        """Execute transformation to string."""
+
+    @overload
+    def transform_to_string(self, xdm_node: PyXdmNode, base_output_uri: str | None) -> str | None:
+        """Execute transformation to string."""
 
 class PyXdmValue:
     def __init__(self) -> None:
