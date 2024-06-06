@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "saxonche-stubs"
-version = "0.7.1"
+version = "0.7.2"
 description = "Type stubs for saxonche"
 authors = ["Bpolitycki <bastian.politycki@unisg.ch>"]
 license = "GPL-3.0-or-later"

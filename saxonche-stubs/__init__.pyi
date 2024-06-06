@@ -227,14 +227,35 @@ class PyXsltExecutable:
         """An PyXsltExecutable represents the compiled form of a stylesheet."""
         ...
     @overload
-    def transform_to_string(
-        self, source_file: str, base_output_uri: str | None
-    ) -> str | None:
+    def transform_to_string(self, source_file: str) -> str | None:
+        """Execute transformation to string.
+
+        Args:
+            source_file (str): The file name of the source document
+
+        Returns:
+            str | None: The result of the transformation as a string
+        """
+
+    @overload
+    def transform_to_string(self, source_file: str, base_output_uri: str) -> str | None:
         """Execute transformation to string."""
 
     @overload
+    def transform_to_string(self, xdm_node: PyXdmNode) -> str | None:
+        """Execute transformation to string.
+
+        Args:
+            xdm_node (PyXdmNode): The source document
+
+
+        Returns:
+            str | None: The result of the transformation as a string
+        """
+
+    @overload
     def transform_to_string(
-        self, xdm_node: PyXdmNode, base_output_uri: str | None
+        self, xdm_node: PyXdmNode, base_output_uri: str
     ) -> str | None:
         """Execute transformation to string."""
 
