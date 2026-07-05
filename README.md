@@ -1,8 +1,9 @@
 # saxonche-stubs
 
-Type stubs for the [saxonche](https://pypi.org/project/saxonche/) python package. This package has no functionality itself, but is merely an addition to the completion within IDEs. The basis for type annotations and comments is the documentation of [the Saxon Python API](https://www.saxonica.com/saxon-c/doc11/html/saxonc.html).
+Type stubs for the [saxonche](https://pypi.org/project/saxonche/) Python package. The type declarations follow the [SaxonC 13 Python API](https://www.saxonica.com/saxon-c/doc13/python/index.html).
 
-At the moment not all APIs are fully typed.
+The public SaxonC-HE 13 API is covered and checked against the native extension
+with `stubtest`.
 
 ## Author / Contact
 

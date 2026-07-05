@@ -1,470 +1,626 @@
-from typing import Any, Iterator, Self, overload
+from collections.abc import Iterator, Mapping, Sequence
+from enum import IntEnum
+from types import TracebackType
+from typing import Any, Self, overload
 
-def __getattr__(name: str) -> Any: ...
+from typing_extensions import disjoint_base
 
+class PySaxonApiError(Exception): ...
+
+class XdmNodeKind(IntEnum):
+    """Axis identifiers accepted by node-navigation methods."""
+
+    ANCESTOR = 0
+    ANCESTOR_OR_SELF = 1
+    ATTRIBUTE = 2
+    CHILD = 3
+    DESCENDANT = 4
+    DESCENDANT_OR_SELF = 5
+    FOLLOWING = 6
+    FOLLOWING_SIBLING = 7
+    NAMESPACE = 8
+    PARENT = 9
+    PRECEDING = 10
+    PRECEDING_SIBLING = 11
+    SELF = 12
+
+class XdmType(IntEnum):
+    """Runtime categories used to identify values in the XDM hierarchy."""
+
+    XDM_VALUE = 0
+    XDM_ATOMIC_VALUE = 1
+    XDM_NODE = 2
+    XDM_ARRAY = 3
+    XDM_MAP = 4
+    XDM_FUNCTION_ITEM = 5
+    XDM_EMPTY = 6
+    XDM_ITEM = 7
+
+def create_xdm_dict(
+    proc: PySaxonProcessor, mmap: Mapping[Any, PyXdmValue]
+) -> dict[PyXdmAtomicValue, PyXdmValue]: ...
+
+@disjoint_base
 class PySaxonProcessor:
-    def __init__(self, license: bool = False) -> None:
-        """An SaxonProcessor acts as a factory for generating XQuery, XPath, Schema
-        and XSLT compilers. This class is itself the context that needs to be managed
-        (i.e. allocation & release)"""
-        ...
+    """Shared SaxonC configuration and factory for XPath, XQuery, XSLT, and XSD APIs."""
+
+    def __new__(cls, license: bool = False) -> Self:
+        """Create a processor, requesting a licensed edition when ``license`` is true."""
     def __enter__(self) -> Self: ...
     def __exit__(
         self,
-        exc_type: Any,
-        exc_val: Any,
-        exc_tb: Any,
+        exc_type: type[BaseException] | None,
+        exc_val: BaseException | None,
+        exc_tb: TracebackType | None,
     ) -> None: ...
+    @property
+    def attach_current_thread(self) -> None: ...
+    @property
+    def cwd(self) -> str: ...
+    @property
+    def detach_current_thread(self) -> None: ...
+    @property
+    def edition(self) -> str: ...
+    @property
+    def is_licensed(self) -> bool: ...
+    @property
+    def is_schema_aware(self) -> bool: ...
+    @property
+    def resources_directory(self) -> str: ...
+    @property
+    def version(self) -> str: ...
+    def clark_name_to_eqname(self, name: str, encoding: str | None = None) -> str: ...
     def clear_configuration_properties(self) -> None:
-        """Clear all configuration properties that have been set"""
-        ...
-    def exception_clear(self) -> None:
-        """Clear any exception that has been raised"""
-        ...
-    def exception_occurred(self) -> bool:
-        """Check whether an exception has been raised internally within Saxon/C.
-
-        Returns:
-            bool: True if an exception has been raised, False otherwise
-        """
-        ...
+        """Remove all configuration properties previously set on this processor."""
+    def empty_sequence(self) -> PyXdmValue:
+        """Return an XDM value representing the empty sequence."""
+    def eqname_to_clark_name(self, name: str, encoding: str | None = None) -> str: ...
+    def get_string_value(self, item: PyXdmItem) -> str: ...
+    def make_array(self, values: Sequence[PyXdmValue]) -> PyXdmArray: ...
+    def make_atomic_value(
+        self, value_type: str, value: str, encoding: str | None = None
+    ) -> PyXdmAtomicValue: ...
     def make_boolean_value(self, value: bool) -> PyXdmAtomicValue:
-        """Create an XdmValue from a boolean.
-
-        Args:
-            value (bool): The boolean value
-
-        Returns:
-            PyXdmAtomicValue: The XdmAtomicValue representing the boolean value.
-        """
-        ...
+        """Create an XDM boolean from a Python boolean."""
+    def make_double_value(self, value: float) -> PyXdmAtomicValue: ...
+    def make_float_value(self, value: float) -> PyXdmAtomicValue: ...
     def make_integer_value(self, value: int) -> PyXdmAtomicValue:
-        """Create Int64Value or a BigIntegerValue from an integer.
-
-        Args:
-            value (int): The integer value
-
-        Returns:
-            PyXdmAtomicValue: The XdmAtomicValue representing the integer value.
-        """
-        ...
-    def make_string_value(self, str_: str) -> PyXdmAtomicValue:
-        """Create an XdmValue from a string.
-
-        Args:
-            str_ (str): The string value. NULL is taken as equivalent to "".
-
-        Returns:
-            PyXdmAtomicValue: The XdmAtomicValue representing the string value.
-        """
-        ...
+        """Create an XDM integer using the appropriate Saxon representation."""
+    def make_long_value(self, value: int) -> PyXdmAtomicValue: ...
+    def make_map(self, dataMap: Mapping[PyXdmAtomicValue, PyXdmValue]) -> PyXdmMap: ...
+    def make_map2(
+        self, dataMap: Mapping[str, PyXdmValue], encoding: str | None = None
+    ) -> PyXdmMap: ...
+    def make_qname_value(
+        self, str_: str, encoding: str | None = None
+    ) -> PyXdmAtomicValue: ...
+    def make_string_value(
+        self, value: str, encoding: str | None = None
+    ) -> PyXdmAtomicValue:
+        """Create an XDM string from a Python string."""
+    def new_document_builder(self) -> PyDocumentBuilder:
+        """Create a builder whose options control construction of source trees."""
+    def new_schema_validator(self) -> PySchemaValidator:
+        """Create a schema validator associated with this processor."""
     def new_xpath_processor(self) -> PyXPathProcessor:
-        """Creates a new XPath processor, which used to evaluate XPath expressions."""
-        ...
+        """Create a processor for evaluating XPath expressions."""
     def new_xquery_processor(self) -> PyXQueryProcessor:
-        """Creates a new XQuery processor, which used to evaluate XQuery expressions."""
-        ...
-    def new_xslt30_processor(self) -> PyXslt30Processor: ...
+        """Create a processor for executing XQuery expressions."""
+    def new_xsd_compiler(self) -> PyXsdCompiler:
+        """Create a compiler for XML Schema definitions."""
+    def new_xslt30_processor(self) -> PyXslt30Processor:
+        """Create a processor for compiling and executing XSLT stylesheets."""
     @overload
-    def parse_xml(self, xml_file_name: str) -> PyXdmNode:
-        """Parse a lexical representation, source file or uri of the source document
-        and return it as an Xdm Node
-
-        Args:
-            xml_file_name (str): The file name of the source document
-
-        Returns:
-            PyXdmNode: The Xdm Node representing the source document
-        """
-        ...
+    def parse_json(self, *, json_file_name: str) -> PyXdmValue: ...
     @overload
-    def parse_xml(self, xml_text: str) -> PyXdmNode:
-        """Parse a lexical representation, source file or uri of the source document
-        and return it as an Xdm Node
-
-        Args:
-             xml_text (str): The lexical representation of the source document
-
-        Returns:
-            PyXdmNode: The Xdm Node representing the source document
-        """
-        ...
+    def parse_json(
+        self, *, json_text: str, encoding: str | None = None
+    ) -> PyXdmValue: ...
     @overload
-    def parse_xml(self, xml_uri: str) -> PyXdmNode:
-        """Parse a lexical representation, source file or uri of the source document
-         and return it as an Xdm Node
+    def parse_xml(self, *, xml_file_name: str) -> PyXdmNode: ...
+    @overload
+    def parse_xml(self, *, xml_text: str, encoding: str | None = None) -> PyXdmNode: ...
+    @overload
+    def parse_xml(self, *, xml_uri: str) -> PyXdmNode: ...
+    def register_user_function(
+        self,
+        ns: str,
+        func: Any,
+        signature_text: str | None = None,
+        signature_map: Mapping[str, Any] | None = None,
+        encoding: str | None = None,
+        use_python_types: bool = False,
+    ) -> None: ...
+    def convert_c_obj(self, value: Any) -> PyXdmValue: ...
+    def set_catalog(self, file_name: str) -> None: ...
+    def set_catalog_files(self, file_names: Sequence[str]) -> None: ...
+    def set_configuration_property(
+        self, name: str, value: str, encoding: str | None = None
+    ) -> None: ...
+    def set_cwd(self, cwd: str) -> None: ...
+    def set_resources_directory(self, dir_: str) -> None: ...
 
-         Args:
-             xml_uri (str): The uri of the source document
+@disjoint_base
+class PyDocumentBuilder:
+    """Build XDM trees with configurable URI, validation, and line-number options."""
 
-        Returns:
-             PyXdmNode: The Xdm Node representing the source document
-        """
-        ...
+    @property
+    def base_uri(self) -> str | None: ...
+    @property
+    def dtd_validation(self) -> bool: ...
+    @property
+    def line_numbering(self) -> bool: ...
+    def get_schema_validator(self) -> PySchemaValidator | None:
+        """Return the validator used while building documents, if configured."""
+    @overload
+    def parse_xml(self, *, xml_file_name: str) -> PyXdmNode: ...
+    @overload
+    def parse_xml(self, *, xml_text: str, encoding: str | None = None) -> PyXdmNode: ...
+    @overload
+    def parse_xml(self, *, xml_uri: str) -> PyXdmNode: ...
+    def set_base_uri(self, base_uri: str) -> None:
+        """Set the base URI used for sources without an intrinsic URI."""
+    def set_dtd_validation(self, value: bool) -> None:
+        """Enable or disable DTD validation while parsing."""
+    def set_line_numbering(self, value: bool) -> None:
+        """Control whether constructed trees retain source locations."""
+    def set_schema_validator(self, val: PySchemaValidator) -> None:
+        """Use the supplied schema validator when constructing documents."""
 
+@disjoint_base
 class PyXPathProcessor:
-    def __init__(self) -> None:
-        """An XPathProcessor represents factory to compile, load and execute the XPath query."""
-        ...
-    def clear_parameters(self) -> None:
-        """Clear all parameters that have been set"""
-        ...
-    def clear_properties(self) -> None:
-        """Clear all properties that have been set"""
-        ...
-    def declare_namespace(self, prefix: str, uri: str) -> None:
-        """Declare a namespace prefix for use in XPath expressions.
+    """Maintain the context used to compile and evaluate XPath expressions."""
 
-        Args:
-            prefix (str): The namespace prefix
-            uri (str): The namespace uri
-        """
-        ...
-    def effective_boolean_value(self, xpath_str: str) -> bool:
-        """Evaluate an XPath expression and return the effective boolean value of the result.
-
-        Args:
-            xpath (str): The XPath expression
-
-        Returns:
-            bool: The effective boolean value of the result
-        """
-        ...
-    def evaluate(self, xpath_str: str) -> PyXdmValue | None:
-        """Evaluate an XPath expression and return the result as a sequence.
-
-        Args:
-            xpath (str): The XPath expression
-
-        Returns:
-            PyXdmValue: A sequence of Xdm Values is returned. Return None if the expression returns an empty sequence.
-        """
-        ...
-    def evaluate_single(self, xpath_str: str) -> PyXdmItem | None:
-        """Evaluate an XPath expression and return the result as a single item.
-
-        Args:
-            xpath (str): The XPath expression
-
-        Returns:
-            PyXdmValue: A single Xdm Item is returned. Return None if the expression returns an empty sequence.
-            If the expression returns a sequence of more than one item, any items after the first are ignored.
-        """
-        ...
-    def exception_clear(self) -> None:
-        """Clear any exception that has been raised"""
-        ...
-    def exception_count(self) -> int:
-        """Get the number of errors and warnings that have been reported.
-
-        Returns:
-            int: The number of errors and warnings that have been reported
-        """
-        ...
-    def exception_occured(self) -> bool:
-        """Check whether an exception has been raised internally within Saxon/C.
-
-        Returns:
-            bool: True if an exception has been raised, False otherwise
-        """
-        ...
+    @property
+    def base_uri(self) -> str | None: ...
+    @property
+    def cwd(self) -> str: ...
+    def is_schema_aware(self) -> bool: ...
+    def clear_parameters(self) -> None: ...
+    def clear_properties(self) -> None: ...
+    def declare_namespace(self, prefix: str, uri: str) -> None: ...
+    def declare_variable(self, name: str) -> None: ...
+    def effective_boolean_value(
+        self, xpath_str: str, encoding: str | None = None
+    ) -> bool: ...
+    def evaluate(
+        self, xpath_str: str, encoding: str | None = None
+    ) -> PyXdmValue | None:
+        """Evaluate XPath and return its complete XDM sequence."""
+    def evaluate_single(
+        self, xpath_str: str, encoding: str | None = None
+    ) -> PyXdmItem | None:
+        """Evaluate XPath and return the first item, or ``None`` when empty."""
+    def get_property(self, name: str) -> str | None: ...
+    def import_schema_namespace(self, uri: str) -> None: ...
+    def remove_parameter(self, name: str) -> bool: ...
     @overload
-    def set_context(self, file_name: str) -> None:
-        """Set the context item from a file.
-
-        Args:
-            file_name (str): The file name of the context item
-        """
-        ...
+    def set_context(self, *, file_name: str) -> None: ...
     @overload
-    def set_context(self, xdm_item: PyXdmItem) -> None:
-        """Set the context item from an XdmItem.
+    def set_context(self, *, xdm_item: PyXdmItem) -> None: ...
+    def set_backwards_compatible(self, option: bool) -> None: ...
+    def set_base_uri(self, base_uri: str) -> None: ...
+    def set_caching(self, is_caching: bool) -> None: ...
+    def set_cwd(self, cwd: str) -> None: ...
+    def set_language_version(self, value: str) -> None: ...
+    def set_parameter(self, name: str, value: PyXdmValue) -> None: ...
+    def set_property(self, name: str, value: str) -> None: ...
+    def set_schema_aware(self, schema_aware: bool) -> None: ...
+    def set_unprefixed_element_matching_policy(self, policy: int) -> None: ...
+    def use_schema(self, schema: PyXsdSchema) -> None: ...
 
-        Args:
-            xdm_item (PyXdmItem): The XdmItem of the context item
-        """
-        ...
-
+@disjoint_base
 class PyXQueryProcessor:
-    def __init__(self) -> None:
-        """An PyXQueryProcessor object represents factory to compile, load and execute queries."""
-    ...
+    """Configure and execute XQuery, returning a file, serialized text, or XDM."""
 
+    @property
+    def base_uri(self) -> str | None: ...
+    @property
+    def cwd(self) -> str: ...
+    def is_schema_aware(self) -> bool: ...
+    def is_streaming(self) -> bool: ...
+    def clear_parameters(self) -> None: ...
+    def clear_properties(self) -> None: ...
+    def declare_namespace(self, prefix: str, uri: str) -> None: ...
+    def remove_parameter(self, name: str) -> bool: ...
+    def run_query_to_file(self, *, output_file_name: str | None = None) -> None: ...
+    def run_query_to_string(self) -> str | None: ...
+    def run_query_to_value(self) -> PyXdmValue | None: ...
+    @overload
+    def set_context(self, *, file_name: str) -> None: ...
+    @overload
+    def set_context(self, *, xdm_item: PyXdmItem) -> None: ...
+    def set_cwd(self, cwd: str) -> None: ...
+    def set_output_file(self, output_file: str) -> None: ...
+    def set_parameter(self, name: str, value: PyXdmValue) -> None: ...
+    def set_property(self, name: str, value: str) -> None: ...
+    def set_query_base_uri(self, base_uri: str) -> None: ...
+    def set_query_content(self, content: str) -> None: ...
+    def set_query_file(self, file_name: str) -> None: ...
+    def set_schema_aware(self, schema_aware: bool) -> None: ...
+    def set_streaming(self, option: bool) -> None: ...
+    def set_updating(self, updating: bool) -> None: ...
+    def use_schema(self, schema: PyXsdSchema) -> None: ...
+
+@disjoint_base
 class PyXslt30Processor:
-    def __init__(self) -> None:
-        """An PyXslt30Processor represents factory to compile, load and execute a stylesheet."""
-        ...
-    def clear_parameters(self) -> None:
-        """Clear all parameters that have been set"""
+    """Compile XSLT 3.0 stylesheets and perform convenience transformations."""
 
-    @overload
-    def compile_stylesheet(self, stylesheet_text: str) -> PyXsltExecutable:
-        """Compile a stylesheet from a string."""
-        ...
-    @overload
-    def compile_stylesheet(self, stylesheet_file: str) -> PyXsltExecutable:
-        """Compile a stylesheet from a file."""
+    @property
+    def cwd(self) -> str: ...
+    def is_schema_aware(self) -> bool: ...
+    def clear_parameters(self) -> None: ...
+    def compile_stylesheet(
+        self,
+        *,
+        stylesheet_text: str | None = None,
+        stylesheet_file: str | None = None,
+        stylesheet_node: PyXdmNode | None = None,
+        save: bool = False,
+        output_file: str | None = None,
+        lang: str = "3.0",
+        fast_compile: bool = False,
+        encoding: str | None = None,
+    ) -> PyXsltExecutable:
+        """Compile a stylesheet supplied as text, file, or XDM node.
 
-    @overload
-    def compile_stylesheet(self, stylesheet_node: PyXdmNode) -> PyXsltExecutable:
-        """Compile a stylesheet from a XDM node."""
-        ...
-    def set_parameter(self, name: str, value: PyXdmValue) -> None:
-        """Set the value of a stylesheet parameter.
-
-        Args:
-            name (str): The name of the stylesheet parameter, as a string.
-                        For namespaced parameter use the JClark notation, that is "{uri}local".
-            value (PyXdmValue): The value of the stylesheet parameter, or None to clear a previously set value.
-
-        Returns:
-            None
+        ``fast_compile`` reduces compilation work and can limit runtime
+        optimization. The returned executable retains dynamic invocation state.
         """
-        ...
-
-class PyXsltExecutable:
-    def __init__(self) -> None:
-        """An PyXsltExecutable represents the compiled form of a stylesheet."""
-        ...
-    @overload
-    def transform_to_string(self, source_file: str) -> str | None:
-        """Execute transformation to string.
-
-        Args:
-            source_file (str): The file name of the source document
-
-        Returns:
-            str | None: The result of the transformation as a string
-        """
-
-    @overload
-    def transform_to_string(self, source_file: str, base_output_uri: str) -> str | None:
-        """Execute transformation to string."""
-
-    @overload
-    def transform_to_string(self, xdm_node: PyXdmNode) -> str | None:
-        """Execute transformation to string.
-
-        Args:
-            xdm_node (PyXdmNode): The source document
-
-
-        Returns:
-            str | None: The result of the transformation as a string
-        """
-
-    @overload
+    def get_jit_compilation(self) -> bool: ...
+    def get_parameter(
+        self, name: str, encoding: str | None = None
+    ) -> PyXdmValue | None: ...
+    def import_package(self, package_file_name: str) -> None: ...
+    def remove_parameter(self, name: str, encoding: str | None = None) -> bool: ...
+    def set_cwd(self, cwd: str) -> None: ...
+    def set_jit_compilation(self, jit: bool) -> None: ...
+    def set_parameter(
+        self, name: str, value: PyXdmValue, encoding: str | None = None
+    ) -> None:
+        """Compile a stylesheet and transform a source directly into a file."""
+    def set_schema_aware(self, schema_aware: bool) -> None: ...
+    def transform_to_file(
+        self, *, source_file: str, stylesheet_file: str, output_file: str
+    ) -> None: ...
     def transform_to_string(
-        self, xdm_node: PyXdmNode, base_output_uri: str
+        self, *, source_file: str, stylesheet_file: str
+    ) -> str | None: ...
+    def transform_to_value(
+        self, *, source_file: str, stylesheet_file: str
+    ) -> PyXdmValue | None: ...
+    def use_schema(self, schema: PyXsdSchema) -> None: ...
+
+@disjoint_base
+class PyXsltExecutable:
+    """Compiled stylesheet and the dynamic state of an invocation context.
+
+    Parameters and invocation settings are mutable. Clone an executable before
+    using it in another thread or in concurrent transformations.
+    """
+
+    @property
+    def cwd(self) -> str: ...
+    def apply_templates_returning_file(
+        self,
+        *,
+        source_file: str | None = None,
+        xdm_value: PyXdmValue | None = None,
+        output_file: str | None = None,
+        base_output_uri: str | None = None,
+    ) -> None: ...
+    def apply_templates_returning_string(
+        self,
+        *,
+        source_file: str | None = None,
+        xdm_value: PyXdmValue | None = None,
+        base_output_uri: str | None = None,
+        encoding: str | None = None,
+    ) -> str | None: ...
+    def apply_templates_returning_value(
+        self,
+        *,
+        source_file: str | None = None,
+        xdm_value: PyXdmValue | None = None,
+        base_output_uri: str | None = None,
+    ) -> PyXdmValue | None: ...
+    def call_function_returning_file(
+        self,
+        function_name: str,
+        arguments: Sequence[PyXdmValue],
+        *,
+        output_file: str | None = None,
+        base_output_uri: str | None = None,
+    ) -> None: ...
+    def call_function_returning_string(
+        self,
+        function_name: str,
+        arguments: Sequence[PyXdmValue],
+        *,
+        base_output_uri: str | None = None,
+        encoding: str | None = None,
+    ) -> str | None: ...
+    def call_function_returning_value(
+        self,
+        function_name: str,
+        arguments: Sequence[PyXdmValue],
+        *,
+        base_output_uri: str | None = None,
+    ) -> PyXdmValue | None: ...
+    def call_template_returning_file(
+        self,
+        template_name: str | None = None,
+        *,
+        output_file: str | None = None,
+        base_output_uri: str | None = None,
+    ) -> None: ...
+    def call_template_returning_string(
+        self,
+        template_name: str | None = None,
+        *,
+        base_output_uri: str | None = None,
+        encoding: str | None = None,
+    ) -> str | None: ...
+    def call_template_returning_value(
+        self,
+        template_name: str | None = None,
+        *,
+        base_output_uri: str | None = None,
+    ) -> PyXdmValue | None: ...
+    def clear_parameters(self) -> None:
+        """Remove all stylesheet parameters set on this executable."""
+    def clear_properties(self) -> None:
+        """Remove serialization and execution properties."""
+    def clear_xsl_messages(self) -> None:
+        """Discard captured output produced by ``xsl:message``."""
+    def clone(self) -> PyXsltExecutable:
+        """Create an independent invocation context sharing the compiled code."""
+    def export_stylesheet(self, file_name: str) -> None:
+        """Write the compiled stylesheet representation for later loading."""
+    def get_initial_template_parameters(
+        self, tunnel: bool
+    ) -> dict[str, PyXdmValue]: ...
+    def get_parameter(self, name: str) -> PyXdmValue | None: ...
+    def get_result_documents(self) -> dict[str, PyXdmValue]: ...
+    def get_xsl_messages(self) -> PyXdmValue | None: ...
+    def remove_parameter(self, name: str) -> bool: ...
+    def set_base_output_uri(self, base_uri: str) -> None: ...
+    def set_capture_result_documents(
+        self, value: bool, raw_result: bool = False
+    ) -> None: ...
+    def set_cwd(self, cwd: str) -> None: ...
+    @overload
+    def set_global_context_item(self, *, file_name: str) -> None: ...
+    @overload
+    def set_global_context_item(self, *, xdm_item: PyXdmItem) -> None: ...
+    @overload
+    def set_initial_match_selection(self, *, file_name: str) -> None: ...
+    @overload
+    def set_initial_match_selection(self, *, xdm_value: PyXdmValue) -> None: ...
+    def set_initial_mode(self, name: str) -> None: ...
+    def set_initial_template_parameters(
+        self, tunnel: bool, parameters: Mapping[str, PyXdmValue]
+    ) -> None: ...
+    def set_output_file(self, output_file: str) -> None: ...
+    def set_parameter(self, name: str, value: PyXdmValue) -> None:
+        """Set a global stylesheet parameter by lexical or Clark name."""
+    def set_property(self, name: str, value: str) -> None: ...
+    def set_result_as_raw_value(self, is_raw: bool) -> None: ...
+    def set_save_xsl_message(
+        self, show: bool, file_name: str | None = None
+    ) -> None: ...
+    def transform_to_file(
+        self,
+        *,
+        source_file: str | None = None,
+        xdm_node: PyXdmNode | None = None,
+        output_file: str | None = None,
+        base_output_uri: str | None = None,
+    ) -> None: ...
+    def transform_to_string(
+        self,
+        *,
+        source_file: str | None = None,
+        xdm_node: PyXdmNode | None = None,
+        base_output_uri: str | None = None,
+        encoding: str | None = None,
     ) -> str | None:
-        """Execute transformation to string."""
+        """Apply the stylesheet and serialize its principal result as text."""
+    def transform_to_value(
+        self,
+        *,
+        source_file: str | None = None,
+        xdm_node: PyXdmNode | None = None,
+        base_output_uri: str | None = None,
+    ) -> PyXdmValue | None: ...
 
+@disjoint_base
+class PySchemaValidator:
+    """Validate XML sources against schemas registered with SaxonC."""
+
+    @property
+    def cwd(self) -> str: ...
+    @property
+    def validation_report(self) -> PyXdmNode | None: ...
+    def clear_parameters(self) -> None: ...
+    def clear_properties(self) -> None: ...
+    def export_schema(self, file_name: str) -> None: ...
+    def get_output_file(self) -> str | None: ...
+    def register_schema(
+        self, *, xsd_file: str | None = None, xsd_text: str | None = None
+    ) -> None: ...
+    def remove_parameter(self, name: str) -> bool: ...
+    def set_cwd(self, cwd: str) -> None: ...
+    def set_lax(self, lax: bool) -> None: ...
+    def set_output_file(self, output_file: str) -> None: ...
+    def set_parameter(self, name: str, value: PyXdmValue) -> None: ...
+    def set_property(
+        self, name: str, value: str, encoding: str | None = None
+    ) -> None: ...
+    def set_source_node(self, source: PyXdmNode) -> None: ...
+    def validate(self, *, file_name: str | None = None) -> None: ...
+    def validate_to_node(self, *, file_name: str | None = None) -> PyXdmNode | None: ...
+
+@disjoint_base
+class PyXsdCompiler:
+    """Compile one or more XML Schema sources into a reusable schema."""
+
+    @property
+    def cwd(self) -> str: ...
+    @property
+    def xsd_version(self) -> str: ...
+    def compile(
+        self,
+        *,
+        schema_file: str | None = None,
+        schema_text: str | None = None,
+        schema_node: PyXdmNode | None = None,
+        schema_location: str | None = None,
+    ) -> PyXsdSchema: ...
+    def empty_schema(self) -> PyXsdSchema: ...
+    def import_components(self, kwds: Mapping[str, Any]) -> PyXsdSchema: ...
+    def set_cwd(self, cwd: str) -> None: ...
+    def set_property(self, name: str, value: str) -> None: ...
+    def set_xsd_version(self, version: str) -> None: ...
+
+@disjoint_base
+class PyXsdSchema:
+    """Compiled XML Schema capable of creating independent validators."""
+
+    def combine(self, schema: PyXsdSchema) -> PyXsdSchema: ...
+    def export_compoments(self, filename: str) -> None: ...
+    def new_schema_validator(self) -> PySchemaValidator: ...
+
+@disjoint_base
 class PyXdmValue:
-    def __init__(self) -> None:
-        """Value in the XDM data model. A value is a sequence of one or more items."""
-        ...
+    """Sequence of zero or more values in the XPath Data Model."""
+
     def __iter__(self) -> Iterator[PyXdmItem]:
-        """Iterate over the items in the sequence.
+        """Iterate over items in sequence order."""
+    @property
+    def head(self) -> PyXdmItem | None: ...
+    @property
+    def size(self) -> int: ...
+    def add_xdm_item(self, value: PyXdmItem) -> None: ...
+    def item_at(self, index: int) -> PyXdmItem | None: ...
 
-        Returns:
-            Iterator[PyXdmItem]: Iterator object of PyXdmValue
-        """
-        ...
-
+@disjoint_base
 class PyXdmItem(PyXdmValue):
-    def __init__(self) -> None: ...
-    def get_atomic_value(self) -> PyXdmAtomicValue:
-        """Get the atomic value of this item.
+    """Single atomic, node, map, array, or function item in the XDM."""
 
-        Returns:
-            PyXdmAtomicValue: The atomic value of this item
-
-        Raises:
-            Exception: If the item is not an atomic value
-        """
-        ...
-    def get_map_value(self) -> PyXdmMap:
-        """Get the map value of this item.
-
-        Returns:
-            PyXdmMap: The map value of this item
-
-        Raises:
-            Exception: If the item is not a map
-        """
-        ...
-    def get_node_value(self) -> PyXdmNode:
-        """Get the node value of this item.
-
-        Returns:
-            PyXdmNode: The node value of this item
-
-        Raises:
-            Exception: If the item is not a node
-        """
-        ...
     @property
-    def head(self) -> PyXdmItem | None:
-        """Property which returns the first item in the sequence.
-
-        Returns:
-            PyXdmItem | None: The first item in the sequence or None if the sequence is empty
-        """
-        ...
+    def is_array(self) -> bool: ...
     @property
-    def is_array(self) -> bool:
-        """Property which returns whether the item is an array.
-
-        Returns:
-            bool: True if the item is an array, False otherwise
-        """
-        ...
+    def is_atomic(self) -> bool: ...
     @property
-    def is_atomic(self) -> bool:
-        """Property which returns whether the item is an atomic value.
-
-        Returns:
-            bool: True if the item is an atomic value, False otherwise
-        """
-        ...
+    def is_function(self) -> bool: ...
     @property
-    def is_function(self) -> bool:
-        """Property which returns whether the item is a function.
-
-        Returns:
-            bool: True if the item is a function, False otherwise
-        """
-        ...
+    def is_map(self) -> bool: ...
     @property
-    def is_map(self) -> bool:
-        """Property which returns whether the item is a map.
-
-        Returns:
-            bool: True if the item is a map, False otherwise
-        """
-        ...
+    def is_node(self) -> bool: ...
     @property
-    def is_node(self) -> bool:
-        """Property which returns whether the item is a node.
+    def string_value(self) -> str: ...
+    def get_array_value(self) -> PyXdmArray: ...
+    def get_atomic_value(self) -> PyXdmAtomicValue: ...
+    def get_function_value(self) -> PyXdmFunctionItem: ...
+    def get_map_value(self) -> PyXdmMap: ...
+    def get_node_value(self) -> PyXdmNode: ...
+    def get_string_value(self, encoding: str | None = None) -> str: ...
 
-        Returns:
-            bool: True if the item is a node, False otherwise
-        """
-        ...
-    @property
-    def string_value(self) -> str:
-        """Property which returns the string value.
-
-        Returns:
-            str: The string value of the atomic value
-        """
-        ...
-
-class PyXdmFunctionItem(PyXdmItem):
-    def __init__(self) -> None:
-        """Represents a function item in the XDM data model."""
-        ...
-
+@disjoint_base
 class PyXdmAtomicValue(PyXdmItem):
-    def __init__(self) -> None:
-        """Reprensts an atomic value in the XDM data model. Atomic values are either
-        built-in atomic values (such as xs:integer or xs:date) or user-defined atomic
-        values."""
-        ...
+    """Atomic XDM value such as a string, boolean, number, QName, or date."""
+
     @property
-    def boolean_value(self) -> bool:
-        """Property which returns the boolean value.
-
-        Returns:
-            bool: The boolean value of the atomic value
-        """
-        ...
+    def boolean_value(self) -> bool: ...
     @property
-    def integer_value(self) -> int:
-        """Property which returns the integer value.
+    def double_value(self) -> float: ...
+    @property
+    def integer_value(self) -> int: ...
+    @property
+    def primitive_type_name(self) -> str: ...
 
-        Returns:
-            int: The integer value of the atomic value
-        """
-        ...
+@disjoint_base
+class PyXdmFunctionItem(PyXdmItem):
+    """Callable XDM function item with a name and arity."""
 
+    @property
+    def arity(self) -> int: ...
+    @property
+    def name(self) -> str | None: ...
+    def call(self, args: Sequence[PyXdmValue]) -> PyXdmValue: ...
+    @staticmethod
+    def get_system_function(
+        proc: PySaxonProcessor, name: str, arity: int, encoding: str | None = None
+    ) -> PyXdmFunctionItem | None: ...
+
+@disjoint_base
 class PyXdmMap(PyXdmFunctionItem):
-    def __init__(self) -> None:
-        """The class PyXdmMap represents a map in the XDM data model. A map is a list of zero or more entries,
-        each consisting of a key-value pair. The map itself is an XDM item and is immutable.
-        """
-        ...
+    """Immutable XDM map from atomic keys to XDM sequences."""
+
     @property
-    def map_size(self) -> int:
-        """Property which returns the number of entries in the map.
-
-        Returns:
-            int: The number of entries in the map
-        """
-        ...
+    def map_size(self) -> int: ...
+    def contains_key(self, key: PyXdmAtomicValue) -> bool: ...
+    def get(
+        self,
+        key: str | PyXdmAtomicValue | int | float,
+        encoding: str | None = None,
+    ) -> PyXdmValue | None: ...
     @property
-    def string_value(self) -> str:
-        """Property which returns the string value of the map.
+    def isEmpty(self) -> bool: ...
+    def keys(self) -> list[PyXdmAtomicValue]: ...
+    def put(self, key: PyXdmAtomicValue, value: PyXdmValue) -> PyXdmMap: ...
+    def remove(self, key: PyXdmAtomicValue) -> PyXdmMap: ...
+    def values(self) -> list[PyXdmValue]: ...
 
-        Returns:
-            str: The string value of the map
-        """
-        ...
-    def contains_key(self, key: PyXdmAtomicValue) -> bool:
-        """Check whether the map contains a given key.
+@disjoint_base
+class PyXdmArray(PyXdmFunctionItem):
+    """Immutable XDM array whose members are XDM sequences."""
 
-        Args:
-            key (PyXdmAtomicValue): The key
+    @property
+    def array_length(self) -> int: ...
+    def add_member(self, value: PyXdmValue) -> None: ...
+    def as_list(self) -> list[PyXdmValue]: ...
+    def concat(self, value: PyXdmArray) -> PyXdmArray: ...
+    def get(self, n: int) -> PyXdmValue | None: ...
+    def put(self, n: int, value: PyXdmValue) -> PyXdmArray: ...
 
-        Returns:
-            bool: True if the map contains the key, False otherwise
-        """
-        ...
-    def get(self, key: str | PyXdmAtomicValue | int | float) -> PyXdmValue | None:
-        """Get the value associated with a given key.
-
-        Args:
-            key (str | PyXdmAtomicValue | int | float): The key
-
-        Returns:
-            PyXdmValue | None: The value associated with the key or None if the key is not present in the map
-        """
-        ...
-    def keys(self) -> list[PyXdmAtomicValue]:
-        """Get the keys of the map.
-
-        Returns:
-            list[PyXdmAtomicValue]: The keys of the map
-        """
-        ...
-    def put(self, key: PyXdmAtomicValue, value: PyXdmValue) -> PyXdmMap:
-        """Put an entry into the map. And return a new map with the entry added.
-
-        Args:
-            key (PyXdmAtomicValue): The key
-            value (PyXdmValue): The value
-
-        Returns:
-            PyXdmMap: The map with the entry added
-        """
-        ...
-    def remove(self, key: PyXdmValue) -> PyXdmMap:
-        """Remove an entry from the map.
-
-        Args:
-            key (PyXdmValue): The key
-
-        Returns:
-            PyXdmMap: The map with the entry removed
-        """
-        ...
-    def values(self) -> list[PyXdmValue]:
-        """Get the values of the map.
-
-        Returns:
-            list[PyXdmValue]: The values of the map
-        """
-        ...
-
+@disjoint_base
 class PyXdmNode(PyXdmItem):
-    def __init__(self) -> None: ...
+    """Node in an XDM tree with navigation, naming, and typed-value access."""
+
+    @property
+    def attribute_count(self) -> int: ...
+    @property
+    def attributes(self) -> list[PyXdmNode]: ...
+    @property
+    def base_uri(self) -> str | None: ...
+    @property
+    def children(self) -> list[PyXdmNode]: ...
+    @property
+    def column_number(self) -> int: ...
+    @property
+    def line_number(self) -> int: ...
+    @property
+    def local_name(self) -> str | None: ...
+    @property
+    def name(self) -> str | None: ...
+    @property
+    def node_kind(self) -> int: ...
+    @property
+    def node_kind_str(self) -> str: ...
+    @property
+    def typed_value(self) -> PyXdmValue: ...
+    def axis_nodes(self, axis: int) -> list[PyXdmNode]: ...
+    def equals(self, other: PyXdmNode) -> bool: ...
+    def get_attribute_value(
+        self, name: str, encoding: str | None = None
+    ) -> str | None: ...
+    def get_parent(self) -> PyXdmNode | None: ...
+    def to_string(self, encoding: str | None = None) -> str: ...
+
+@disjoint_base
+class PyXdmValueIterator(Iterator[PyXdmItem]):
+    def __init__(self, *args: Any, **kwargs: Any) -> None: ...
+    def __iter__(self) -> Self: ...
+    def __next__(self) -> PyXdmItem: ...

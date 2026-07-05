@@ -1,0 +1,7 @@
+# Cython implementation details that are not part of the public SaxonC API.
+saxonche.ProcRefCounter
+saxonche.PyXdmValueIterator.__reduce_cython__
+saxonche.PyXdmValueIterator.__setstate_cython__
+saxonche.__reduce_cython__
+saxonche.__setstate_cython__
+saxonche.__test__
